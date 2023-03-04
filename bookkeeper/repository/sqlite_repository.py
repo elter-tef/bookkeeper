@@ -42,7 +42,13 @@ class SQLiteRepository(AbstractRepository[T]):
                 )
             con.close()
         else:
-            return None
+            with sqlite3.connect(self.db_file) as con:
+                cur = con.cursor()
+                cur.execute('PRAGMA foreign_keys = ON')
+                cur.execute(
+                    f'SELECT * FROM {self.table_name} '
+                )
+            con.close()
 
 
     def update(self, obj: T) -> None:
