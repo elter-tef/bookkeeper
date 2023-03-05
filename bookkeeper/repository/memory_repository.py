@@ -28,7 +28,7 @@ class MemoryRepository(AbstractRepository[T]):
     def get(self, pk: int) -> T | None:
         return self._container.get(pk)
 
-    def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
+    def get_all(self, where: dict[str, any] | None = None) -> list[T]:
         if where is None:
             return list(self._container.values())
         return [obj for obj in self._container.values()
