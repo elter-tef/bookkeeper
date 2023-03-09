@@ -48,22 +48,29 @@ class SQLiteRepository(AbstractRepository[T]):
             q = f'SELECT * FROM {self.table_name} WHERE pk = {pk}'
             row = cur.execute(q).fetchone()
         con.close()
-
         if row is None:
             return None
-
         return self.__generate_object(row)
 
     def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
-        with sqlite3.connect(self.db_file) as con:
-            cur = con.cursor()
-            cur.execute(f'SELECT * FROM {self.table_name}')  # TODO: добавить блок WHERE
-            rows = cur.fetchall()
-        con.close()
-
+        def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
+            names = list(where.keys())
+            if names:
+                with sqlite3.connect(self.db_file) as con:
+                    cur = con.cursor()
+                    cur.execute('PRAGMA foreign_keys = ON')
+                    cur.execute(
+                        f'SELECT FROM {self.table_name} WHERE {("{param} = {where[param]} , " for param in names)} = '
+                    )
+                con.close()
+            else:
+                with sqlite3.connect(self.db_file) as con:
+                    cur = con.cursor()
+                    cur.execute(f'SELECT * FROM {self.table_name}')
+                    rows = cur.fetchall()
+                con.close()
         if rows is None:
             return None
-
         return [self.__generate_object(row) for row in rows]
 
     def update(self, obj: T) -> None:
@@ -77,6 +84,7 @@ class SQLiteRepository(AbstractRepository[T]):
                     f'UPDATE {self.table_name} SET {param} = {getattr(obj, param)} WHERE rowid = {obj.pk}'
                 )
         con.close()
+
 
     def delete(self, pk: int) -> None:
         with sqlite3.connect(self.db_file) as con:
