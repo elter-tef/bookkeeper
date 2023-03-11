@@ -1,5 +1,5 @@
 import sqlite3
-
+from typing import Any
 from inspect import get_annotations
 from bookkeeper.repository.abstract_repository import AbstractRepository, T
 
@@ -52,45 +52,44 @@ class SQLiteRepository(AbstractRepository[T]):
             return None
         return self.__generate_object(row)
 
-    def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
-        def get_all(self, where: dict[str, Any] | None = None) -> list[T]:
+    def get_all(self, where: dict[str, Any] | None = None) -> list[T] | None:
+        if where:
             names = list(where.keys())
-            if names:
-                with sqlite3.connect(self.db_file) as con:
-                    cur = con.cursor()
-                    cur.execute('PRAGMA foreign_keys = ON')
-                    cur.execute(
-                        f'SELECT FROM {self.table_name} WHERE {("{param} = {where[param]} , " for param in names)} = '
-                    )
-                con.close()
-            else:
-                with sqlite3.connect(self.db_file) as con:
-                    cur = con.cursor()
-                    cur.execute(f'SELECT * FROM {self.table_name}')
-                    rows = cur.fetchall()
-                con.close()
+            with sqlite3.connect(self.db_file) as con:
+                cur = con.cursor()
+                cur.execute('PRAGMA foreign_keys = ON')
+                cur.execute(
+                     f'SELECT FROM {self.table_name} WHERE {("{param} = {where[param]} , " for i in names)} = '
+                )
+                rows = cur.fetchall()
+            con.close()
+        else:
+            with sqlite3.connect(self.db_file) as con:
+                cur = con.cursor()
+                cur.execute(f'SELECT * FROM {self.table_name}')
+                rows = cur.fetchall()
+            con.close()
+
         if rows is None:
             return None
         return [self.__generate_object(row) for row in rows]
 
     def update(self, obj: T) -> None:
         names = list(self.fields.keys())
-        values = [getattr(obj, x) for x in self.fields]
         with sqlite3.connect(self.db_file) as con:
             cur = con.cursor()
-            cur.execute('PRAGMA foreign_keys = ON')
             for param in names:
                 cur.execute(
                     f'UPDATE {self.table_name} SET {param} = {getattr(obj, param)} WHERE rowid = {obj.pk}'
                 )
         con.close()
-
+        return None
 
     def delete(self, pk: int) -> None:
         with sqlite3.connect(self.db_file) as con:
             cur = con.cursor()
-            cur.execute('PRAGMA foreign_keys = ON')
             cur.execute(
                 f'DELETE FROM {self.table_name} WHERE rowid = {pk}'
             )
         con.close()
+        return None
