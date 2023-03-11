@@ -1,5 +1,8 @@
 from bookkeeper.models.expense import Expense
+
+
 class ExpensePresenter:
+
     def __init__(self, model, view, cat_repo, exp_repo):
         self.model = model
         self.view = view
@@ -12,27 +15,32 @@ class ExpensePresenter:
 
     def update_expense_data(self):
         self.exp_data = self.exp_repo.get_all()
-        for e in self.exp_data:  #TODO: "TypeError: 'NoneType' object is not iterable" on empty DB
-            for c in self.cat_data:
-                if c.pk == e.category:
-                    e.category = c.name
-                    break
-        self.view.set_expense_table(self.exp_data)
+        if self.exp_data:
+            for e in self.exp_data:
+                for c in self.cat_data:
+                    if c.pk == e.category:
+                        e.category = c.name
+                        break
+            self.view.set_expense_table(self.exp_data)
+
     def show(self):
         self.view.show()
-        self.view.set_expense_table(self.exp_data)
+        self.update_expense_data()
         self.view.set_category_dropdown(self.cat_data)
+
     def handle_expense_add_button_clicked(self) -> None:
         cat_pk = self.view.get_selected_cat()
         amount = self.view.get_amount()
-        exp = Expense(int(amount), category=cat_pk)
+        exp = Expense(int(amount), cat_pk)
         self.exp_repo.add(exp)
         self.update_expense_data()
+
     def handle_expense_delete_button_clicked(self) -> None:
         selected = self.view.get_selected_expenses()
         if selected:
             for e in selected:
                 self.exp_repo.delete(e)
             self.update_expense_data()
+
     def handle_category_edit_button_clicked(self):
         self.view.show_cats_dialog(self.cat_data)

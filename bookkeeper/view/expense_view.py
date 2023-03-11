@@ -130,4 +130,4 @@ class MainWindow(QtWidgets.QMainWindow):
             cat_dlg = CategoryDialog(data)
             cat_dlg.setWindowTitle('Редактирование категорий')
             cat_dlg.setGeometry(300, 100, 600, 300)
-            cat_dlg.exec_()
+            cat_dlg.exec()

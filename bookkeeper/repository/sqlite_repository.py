@@ -48,6 +48,7 @@ class SQLiteRepository(AbstractRepository[T]):
             q = f'SELECT * FROM {self.table_name} WHERE pk = {pk}'
             row = cur.execute(q).fetchone()
         con.close()
+
         if row is None:
             return None
         return self.__generate_object(row)
@@ -59,7 +60,7 @@ class SQLiteRepository(AbstractRepository[T]):
                 cur = con.cursor()
                 cur.execute('PRAGMA foreign_keys = ON')
                 cur.execute(
-                     f'SELECT FROM {self.table_name} WHERE {("{param} = {where[param]} , " for i in names)} = '
+                    f'SELECT FROM {self.table_name} WHERE {("{param} = {where[param]} , " for i in names)} = '
                 )
                 rows = cur.fetchall()
             con.close()
@@ -70,8 +71,9 @@ class SQLiteRepository(AbstractRepository[T]):
                 rows = cur.fetchall()
             con.close()
 
-        if rows is None:
+        if not rows:
             return None
+        print(rows)
         return [self.__generate_object(row) for row in rows]
 
     def update(self, obj: T) -> None:
