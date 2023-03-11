@@ -1,6 +1,7 @@
 from bookkeeper.models.expense import Expense
 
 
+
 class ExpensePresenter:
 
     def __init__(self, model, view, cat_repo, exp_repo):
@@ -31,7 +32,8 @@ class ExpensePresenter:
     def handle_expense_add_button_clicked(self) -> None:
         cat_pk = self.view.get_selected_cat()
         amount = self.view.get_amount()
-        exp = Expense(int(amount), cat_pk)
+        expense_date = self.view.get_expense_date()
+        exp = Expense(int(amount), cat_pk, expense_date)
         self.exp_repo.add(exp)
         self.update_expense_data()
 

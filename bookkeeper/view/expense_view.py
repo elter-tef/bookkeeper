@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QComboBox, QLineEdit, QPushButton
 from PySide6 import QtCore, QtWidgets
 from bookkeeper.view.category_view import CategoryDialog
-
-
+from datetime import datetime
+import re
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
@@ -50,6 +50,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.addWidget(QLabel('<TODO: таблица бюджета>\n\n\n\n\n\n\n\n'))
 
         self.bottom_controls = QGridLayout()
+
+        self.bottom_controls.addWidget(QLabel("expense_date in format '%Y-%m-%d'"), 3, 0)
+        self.expense_date_line_edit = QLineEdit()
+        self.bottom_controls.addWidget(self.expense_date_line_edit, 3, 1)
 
         self.bottom_controls.addWidget(QLabel('Сумма'), 0, 0)
 
@@ -107,6 +111,18 @@ class MainWindow(QtWidgets.QMainWindow):
             return float(self.amount_line_edit.text())
         else:
             raise Exception
+
+    def get_expense_date(self):
+
+        if self.amount_line_edit.text() == "":
+            return datetime.now
+        datetime_string = self.expense_date_line_edit.text()
+        date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if date_pattern.match(datetime_string):
+            print('suc date match')
+            return datetime.strptime(datetime_string, '%Y-%m-%d')
+        else:
+            raise Exception("Unrecognized datetime format")
 
     def __get_selected_row_indices(self) -> list[int]:
         if self.expenses_grid.selectionModel():
