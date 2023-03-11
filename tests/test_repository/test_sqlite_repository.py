@@ -9,7 +9,6 @@ def custom_class():
     @dataclass
     class Custom:
         pk: int = 0
-        test_field: str = 'abc'
 
     return Custom
 
@@ -24,3 +23,11 @@ def test_add_and_get(repo, custom_class):
     pk = repo.add(obj)
     assert obj.pk == pk
     assert repo.get(pk) == obj
+
+
+def test_add_and_delete(repo, custom_class):
+    obj = custom_class()
+    pk = repo.add(obj)
+    assert obj.pk == pk
+    repo.delete(pk)
+    assert repo.get(pk) is None
