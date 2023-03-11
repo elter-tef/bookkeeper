@@ -109,7 +109,9 @@ class MainWindow(QtWidgets.QMainWindow):
             raise Exception
 
     def __get_selected_row_indices(self) -> list[int]:
-        return list(set([qmi.row() for qmi in self.expenses_grid.selectionModel().selection().indexes()]))
+        if self.expenses_grid.selectionModel():
+            return list(set([qmi.row() for qmi in self.expenses_grid.selectionModel().selection().indexes()]))
+        return None
 
     def get_selected_expenses(self) -> list[int] | None:
         idx = self.__get_selected_row_indices()
